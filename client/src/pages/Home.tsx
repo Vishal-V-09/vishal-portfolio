@@ -1,5 +1,6 @@
 /** Red Editorial Circle portfolio for Vishal V. */
 import { useEffect, useState } from "react";
+import emailjs from "@emailjs/browser";
 import {
   ArrowUpRight,
   Check,
@@ -821,34 +822,57 @@ export default function Home() {
             </div>
             <GlassCard className="contact-form-card">
               <form
-                onSubmit={e => {
+                onSubmit={async (e) => {
                   e.preventDefault();
-                  setSent(true);
-                  toast(
-                    "Message captured — Vishal can connect this form to a mail service when ready."
-                  );
+
+                  const form = e.currentTarget;
+                  const formData = new FormData(form);
+
+                  try {
+                    await emailjs.send(
+                      "service_bdtxahq",
+                      "template_a326nt6",
+                      {
+                        name: formData.get("name"),
+                        email: formData.get("email"),
+                        subject: formData.get("subject"),
+                        message: formData.get("message"),
+                      },
+                      {
+                        publicKey: "lAi9WQU64RHDc9SXm",
+                      }
+                    );
+
+                    setSent(true);
+                    toast.success("Message sent successfully!");
+                    form.reset();
+                  } catch (error) {
+                    console.error("EmailJS error:", error);
+                    toast.error("Message could not be sent. Please try again.");
+                  }
                 }}
               >
-                <label>
-                  FULL NAME
-                  <input required placeholder="Your name" />
-                </label>
-                <label>
-                  EMAIL ADDRESS
-                  <input required type="email" placeholder="you@company.com" />
-                </label>
-                <label>
-                  SUBJECT
-                  <input required placeholder="Internship opportunity" />
-                </label>
-                <label>
-                  MESSAGE
-                  <textarea
-                    required
-                    rows={4}
-                    placeholder="Tell me a little about the opportunity..."
-                  />
-                </label>
+                <input name="name" required placeholder="Your name" />
+
+                <input
+                  name="email"
+                  required
+                  type="email"
+                  placeholder="you@company.com"
+                />
+
+                <input
+                  name="subject"
+                  required
+                  placeholder="Internship opportunity"
+                />
+
+                <textarea
+                  name="message"
+                  required
+                  rows={4}
+                  placeholder="Tell me a little about the opportunity..."
+                />
                 <button className="primary-btn" type="submit">
                   {sent ? "Message ready ✓" : "Send Message"} <Send size={15} />
                 </button>
